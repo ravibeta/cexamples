@@ -46,7 +46,7 @@ int* initialize_cluster_labels(double** vectors, int size, int k)
     int* cluster_labels = NULL;
     if (size == 0 || k == 0) return cluster_labels;
     cluster_labels = (int*) malloc(size * sizeof(int));
-    if (cluster_labels == NULL){printf("Require more memory"); exit(0);}
+    if (cluster_labels == NULL){printf("Require more memory"); exit(1);}
     for (int i = 0; i < size; i++) cluster_labels[i] = rand() % k;
     return cluster_labels;
 }
@@ -56,7 +56,7 @@ int* initialize_centroids(double** vectors, int size, int k)
     if (vectors == NULL || *vectors == NULL || k == 0) return NULL;
     srand(time(NULL));
     int* centroids = (int*) malloc(k * sizeof(int));
-    if (centroids  == NULL) { printf("Require more memory"); exit(0);}
+    if (centroids  == NULL) { printf("Require more memory"); exit(1);}
     for (int i = 0; i <k; i++)
     for (int i = 0; i <k; i++)
     {
@@ -86,7 +86,7 @@ bool fix_centroids(int dimension, double** vectors, int* centroids, int* cluster
 {
     bool centroids_updated = false;
     int* new_centroids = (int*) malloc(k * sizeof(int));
-    if (new_centroids == NULL) { printf("Require more memory"); exit(0);}
+    if (new_centroids == NULL) { printf("Require more memory"); exit(1);}
     for (int i = 0; i < k; i++)
     {
         int label = i;
