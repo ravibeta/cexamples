@@ -14,9 +14,10 @@
 */
 extern int* initialize_cluster_labels(double** , int,  int );
 extern int* initialize_centroids(double**, int, int );
-extern bool assign_clusters(int, double**, int*, int*, int, int);
-extern void fix_centroids(int, double**, int*, int*, int, int);
+extern void assign_clusters(int, double**, int*, int*, int, int);
+extern bool fix_centroids(int, double**, int*, int*, int, int);
 extern void print_clusters(int*, int);
+extern double get_cosine_distance(int, double*, double*);
 
 void kmeans(int dimension, double **vectors, int size, int k, int max_iterations)
 {
@@ -30,8 +31,8 @@ void kmeans(int dimension, double **vectors, int size, int k, int max_iterations
      {
          count++;
          if (count > max_iterations) break;
-         fix_centroids(dimension, vectors, centroids, cluster_labels, size, k);
-         centroids_updated = assign_clusters(dimension, vectors, centroids, cluster_labels, size, k);
+         centroids_updated = fix_centroids(dimension, vectors, centroids, cluster_labels, size, k);
+         assign_clusters(dimension, vectors, centroids, cluster_labels, size, k);
      }
 
      print_clusters(cluster_labels, size);
@@ -57,32 +58,76 @@ int* initialize_centroids(double** vectors, int size, int k)
     int* centroids = (int*) malloc(k * sizeof(int));
     if (centroids  == NULL) { printf("Require more memory"); exit(0);}
     for (int i = 0; i <k; i++)
+    for (int i = 0; i <k; i++)
     {
         centroids[i] = rand() % size;
     }
     return centroids;
 }
 
-bool assign_clusters(int dimension, double** vectors, int* centroids, int* cluster_labels, int size, int k)
+void assign_clusters(int dimension, double** vectors, int* centroids, int* cluster_labels, int size, int k)
 {
-    bool centroids_updated = false;
-    // for each vector
-    // find distance to each centroid
-    // assign to the cluster of the nearest centroid
-    return centroids_updated;
+    for (int m = 0; m < size; m++)
+    {
+        double minimum = get_cosine_distance(dimension, vectors[centroids[cluster_labels[m]]], vectors[m]);
+        for (int i = 0; i < k; i++)
+        {
+             double* centroid = vectors[centroids[i]];
+             double distance = get_cosine_distance(dimension, centroid, vectors[m]);
+             if (distance < minimum)
+             {
+                 cluster_labels[m] = i;
+             }
+        }
+    }
 }
 
-void fix_centroids(int dimension, double** vectors, int* centroids, int* cluster_labels, int size, int k)
+bool fix_centroids(int dimension, double** vectors, int* centroids, int* cluster_labels, int size, int k)
 {
+    bool centroids_updated = false;
+    int* new_centroids = (int*) malloc(k * sizeof(int));
+    if (new_centroids == NULL) return false;
     for (int i = 0; i < k; i++)
     {
         int label = i;
-        for (int i = 0; i < size; i++)
+        double minimum = 0;
+        double* centroid = vectors[centroids[label]];
+        for (int j = 0; j < size; j++)
         {
-          // select rows with same label
-          // pick one of the rows as the new centroid based on inter-row distance
+             if (j != centroids[label] && cluster_labels[j] == label)
+             {
+                double cosd = get_cosine_distance(dimension, centroid, vectors[j]);
+                minimum += cosd * cosd;
+             }
+        }
+        for (int j = 0; j < size; j++)
+        {
+             if (cluster_labels[j] != label) continue;
+             double distance = 0;
+             for (int m = 0; m < size; m++)
+             {
+                if (cluster_labels[m] != label) continue;
+                if (m == j) continue;
+                double cosd = get_cosine_distance(dimension, vectors[m], vectors[j]);
+                distance += cosd * cosd;
+             }
+             if (distance < minimum)
+             {
+                 minimum = distance;
+                 new_centroids[label] = j;
+                 centroids_updated = true;
+             }
         }
     }
+    if (centroids_updated)
+    {
+        for (int j = 0; j < k; j++)
+        {
+            centroids[j] = new_centroids[j];
+        }
+    }
+    free(new_centroids);
+    return centroids_updated;
 }
 
 void print_clusters(int* cluster_labels, int size)
@@ -109,3 +154,4 @@ double get_cosine_distance(int dimension, double* vec1, double* vec2)
     distance /= magnitude;
     return distance;
 }
+
