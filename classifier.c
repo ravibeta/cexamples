@@ -31,8 +31,8 @@ void kmeans(int dimension, double **vectors, int size, int k, int max_iterations
      {
          count++;
          if (count > max_iterations) break;
-         centroids_updated = fix_centroids(dimension, vectors, centroids, cluster_labels, size, k);
          assign_clusters(dimension, vectors, centroids, cluster_labels, size, k);
+         centroids_updated = fix_centroids(dimension, vectors, centroids, cluster_labels, size, k);
      }
 
      print_clusters(cluster_labels, size);
