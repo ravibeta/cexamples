@@ -58,7 +58,6 @@ int* initialize_centroids(double** vectors, int size, int k)
     int* centroids = (int*) malloc(k * sizeof(int));
     if (centroids  == NULL) { printf("Require more memory"); exit(1);}
     for (int i = 0; i <k; i++)
-    for (int i = 0; i <k; i++)
     {
         centroids[i] = rand() % size;
     }
